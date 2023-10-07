@@ -9,7 +9,7 @@ namespace OpenAI_Sales_Query
     class Program
     {
         static readonly string API_URL = "https://api.openai.com/v1/chat/completions";
-        static readonly string API_KEY = "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"; // Replace with your key and never share it publicly.
+        static readonly string API_KEY = "Your-API-Key"; // Replace with your key and never share it publicly.
 
         static void Main(string[] args)
         {
