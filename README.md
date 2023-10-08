@@ -12,6 +12,8 @@ Please clone the project using `git clone https://github.com/14H034160212/Qiming
 ### Install required packages
 `pip install spacy`
 
+‘pip install flask’
+
 `python -m spacy download en_core_web_sm`
 
 `python -m spacy download en_core_web_md`
