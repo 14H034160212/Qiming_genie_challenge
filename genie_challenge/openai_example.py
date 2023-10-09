@@ -23,7 +23,7 @@ parser.add_argument('--api_key', default="Your-api-key​",
 
 
 args = parser.parse_args()
-openai.api_key = "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"
+openai.api_key = args.api_key
 
 def clean_string(s):
     return ''.join(char for char in s if ord(char) < 256)
