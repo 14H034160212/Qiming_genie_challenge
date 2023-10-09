@@ -13,6 +13,7 @@ After you clone your project, using your own openai api key and you can use eith
 
 ### Basic test cases
 Here are some examples input and output include:
+
 Input: `- "top 5 sales reps by value sold"` -> Output： `salesperson, total value, descending, limit 5`
 
 Input: `- "highest selling products by count"` -> Output: `product, quantity, descending, no limit`
