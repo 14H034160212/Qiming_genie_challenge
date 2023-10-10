@@ -7,12 +7,15 @@ After you clone your project, using your own openai api key and you can use eith
 
 #### Python Version
 You need to create an virtual environment.
+
 `python -v venv venv`
 
 And install the following packages.
+
 'pip install openai'
 
 Run the program.
+
 `python openai_example.py` 
 
 #### C# Version
