@@ -9,7 +9,7 @@ After you clone your project, using your own openai api key and you can use eith
 `python openai_example.py` 
 
 #### C# Version
-`dotnet run` 
+`dotnet run your-api-key-here` 
 
 ### Basic test cases
 Here are some examples input and output include:
