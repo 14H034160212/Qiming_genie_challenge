@@ -6,6 +6,13 @@ Please clone the project using `git clone https://github.com/14H034160212/Qiming
 After you clone your project, using your own openai api key and you can use either python version or C# version to ask question and conduct query separately to run the project under `Qiming_genie_challenge/genie_challenge` folder and then you can interact the program and type question in natural langauge format if you want.
 
 #### Python Version
+You need to create an virtual environment.
+`python -v venv venv`
+
+And install the following packages.
+'pip install openai'
+
+Run the program.
 `python openai_example.py` 
 
 #### C# Version
