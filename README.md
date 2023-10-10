@@ -18,7 +18,7 @@ And install the following packages.
 
 Run the program.
 
-`python openai_example.py` 
+`python openai_example.py --api_key your-api-key-here` 
 
 #### C# Version
 `dotnet run your-api-key-here` 
