@@ -4,6 +4,7 @@ using System.Text;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace OpenAI_Sales_Query
 {
@@ -122,7 +123,16 @@ namespace OpenAI_Sales_Query
                         }
                         else
                         {
-                            values.Add($"{key} {value}");
+                            Regex regex = new Regex(@"\d+");
+                            Match match = regex.Match(value);
+                            if (match.Success)
+                            {
+                                values.Add($"{key} {match.Value}");
+                            }
+                            else
+                            {
+                                values.Add($"{key} {value}");
+                            }
                         }
                     }
                     else
@@ -137,7 +147,17 @@ namespace OpenAI_Sales_Query
                         }
                     }
                 }
-                
+
+                if (values.Count > 4)
+                {
+                    return "Too many elements in the result. Please enter your question again.";
+                }
+
+                if (!values.Any(v => !string.IsNullOrWhiteSpace(v)))
+                {
+                    return "No valid output received. Please enter your question again.";
+                }
+
                 return string.Join(", ", values.Where(v => !string.IsNullOrWhiteSpace(v)));
             }
         }

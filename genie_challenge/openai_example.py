@@ -4,6 +4,7 @@ import json
 import pandas as pd
 from tqdm import tqdm
 import argparse
+import re
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_name', default="gpt-3.5-turbo",
@@ -18,7 +19,7 @@ parser.add_argument('--frequency_penalty', type=float, default=0,
                     help='A parameter that penalizes words that have already been generated in the response to encourage the model to generate new words.')
 parser.add_argument('--presence_penalty', type=float, default=0,
                     help='A parameter that penalizes words that were present in the input messages to encourage the model to generate new words.')
-parser.add_argument('--api_key', default="Your-api-key​",
+parser.add_argument('--api_key', default="Your-api-key",
                     help='Type your openai api key')
 
 
@@ -28,11 +29,13 @@ openai.api_key = args.api_key
 def clean_string(s):
     return ''.join(char for char in s if ord(char) < 256)
 
-def extract_value(input_str, key):
-    for line in input_str.split('\n'):
-        if line.startswith(key):
-            return line.split(': ')[1]
-    return None
+def extract_value(input_str):
+    dictionary = {}
+    for line in input_str.split("\n"):
+        if ":" in line:
+            key, value = line.split(":")
+            dictionary[key] = value.strip()
+    return dictionary
 
 # Interactive loop for user input
 while True:
@@ -57,18 +60,29 @@ while True:
 
     reply = response["choices"][0]["message"]["content"]
     reply = reply.lower()
-    dimension = extract_value(reply, 'dimension')
-    measure = extract_value(reply, 'measure')
-    order = extract_value(reply, 'order')
-    limit = extract_value(reply, 'limit')
+
+    dictionary = extract_value(reply)
+    if len(dictionary) > 4:
+        print("Too many elements in the result. Please enter your question again.")
+        continue
+    if not dictionary:
+        print("No valid output received. Please rephrase your question.")
+        continue
+
+    keys = list(dictionary.keys())
+    dimension = dictionary[keys[0]]
+    measure = dictionary[keys[1]]
+    order = dictionary[keys[2]]
+    limit = dictionary[keys[3]]
     if "value" in measure:
         measure = "total value"
     
-    if "all" in limit.lower() or "not specified" in limit.lower():
+    if "all" in limit.lower() or "specifi" in limit.lower() or "no" in limit.lower():
         print(f"{dimension}, {measure}, {order}, {'no limit'}")
     else:
-        print(f"{dimension}, {measure}, {order}, limit {limit}")
-    # print(reply)
+        limits = re.findall(r'\d+', limit)
+        limit_number = limits[0]
+        print(f"{dimension}, {measure}, {order}, limit {limit_number}")
 
     # Add the model's response to the chat history
     chat_history.append({"role": "system", "content": clean_string(reply)})
