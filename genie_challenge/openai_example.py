@@ -45,8 +45,21 @@ while True:
     if query.lower() in ['exit', 'quit']:
         break
 
-    prompt = "Given a sales database with dimensions: product, product category, salesperson, region. And the measures: quantity, price, total value. Here are some examples. User input: top 5 sales reps by value sold. -> Output: salesperson, total value, descending, limit 5. Each query, such as 'top 5 regions by value sold' will specify: - the dimension that would be used to group the results, in this case 'region' - the measure that would be aggregated, in this case 'value' - an indication of whether the results would be returned in ascending or descending order, in this case descending - optionally, a limit for the number of results that would be returned, in this case 5. Please following the above example. Please following the above pattern and print the dimension, measure, an indication of whether the results would be returned in ascending or descending order and a limit for the number of results that would be returned:"
-    chat_history.append({"role": "user", "content": prompt+clean_string(query)})
+    # prompt = "Given a sales database with dimensions: product, product category, salesperson, region. And the measures: quantity, price, total value. Here are some examples. User input: top 5 sales reps by value sold. -> Output: salesperson, total value, descending, limit 5. Each query, such as 'top 5 regions by value sold' will specify: - the dimension that would be used to group the results, in this case 'region' - the measure that would be aggregated, in this case 'value' - an indication of whether the results would be returned in ascending or descending order, in this case descending - optionally, a limit for the number of results that would be returned, in this case 5. Please following the above example. Please following the above pattern and print the dimension, measure, an indication of whether the results would be returned in ascending or descending order and a limit for the number of results that would be returned:"
+    prompt_part1 = "Given a sales database with dimensions: product, product category, salesperson, region. "
+    prompt_part2 = "And the measures: quantity, price, total value. Here are some examples. "
+    prompt_part3 = "User input: top 5 sales reps by value sold. -> Output: salesperson, total value, descending, limit 5. "
+    prompt_part4 = "Each query, such as 'top 5 regions by value sold' will specify: "
+    prompt_part5 = "- the dimension that would be used to group the results, in this case 'region' "
+    prompt_part6 = "- the measure that would be aggregated, in this case 'value' "
+    prompt_part7 = "- an indication of whether the results would be returned in ascending or descending order, in this case descending "
+    prompt_part8 = "- optionally, a limit for the number of results that would be returned, in this case 5. "
+    prompt_part9 = "Please following the above example. "
+    prompt_part10 = "Please following the above pattern and print the dimension, measure, an indication of whether the results would be returned in ascending or descending order and a limit for the number of results that would be returned:"
+
+    prompt = prompt_part1 + prompt_part2 + prompt_part3 + prompt_part4 + prompt_part5 + prompt_part6 + prompt_part7 + prompt_part8 + prompt_part9 + prompt_part10
+
+    chat_history.append({"role": "user", "content": prompt + clean_string(query)})
 
     response = openai.ChatCompletion.create(
         model=args.model_name,
@@ -64,6 +77,9 @@ while True:
     dictionary = extract_value(reply)
     if len(dictionary) > 4:
         print("Too many elements in the result. Please enter your question again.")
+        continue
+    if len(dictionary) < 4:
+        print("Too less elements in the result. Please enter your question again.")
         continue
     if not dictionary:
         print("No valid output received. Please rephrase your question.")

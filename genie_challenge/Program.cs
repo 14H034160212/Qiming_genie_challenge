@@ -54,7 +54,19 @@ namespace OpenAI_Sales_Query
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
-                var prompt = $"Given a sales database with dimensions: product, product category, salesperson, region. And the measures: quantity, price, total value. Here are some examples. User input: top 5 sales reps by value sold. -> Output: salesperson, total value, descending, limit 5. Each query, such as 'top 5 regions by value sold' will specify: - the dimension that would be used to group the results, in this case 'region' - the measure that would be aggregated, in this case 'value' - an indication of whether the results would be returned in ascending or descending order, in this case descending - optionally, a limit for the number of results that would be returned, in this case 5. Please following the above example. Please following the above pattern and print the dimension, measure, an indication of whether the results would be returned in ascending or descending order and a limit for the number of results that would be returned: \"{inputQuery}\".";
+                string baseIntro = "Given a sales database with dimensions: product, product category, salesperson, region. ";
+                string measures = "And the measures: quantity, price, total value. ";
+                string examples = "Here are some examples. User input: top 5 sales reps by value sold. -> Output: salesperson, total value, descending, limit 5. ";
+                string querySpecs = "Each query, such as 'top 5 regions by value sold' will specify: ";
+                string dimensionDetail = "- the dimension that would be used to group the results, in this case 'region' ";
+                string measureDetail = "- the measure that would be aggregated, in this case 'value' ";
+                string orderDetail = "- an indication of whether the results would be returned in ascending or descending order, in this case descending ";
+                string limitDetail = "- optionally, a limit for the number of results that would be returned, in this case 5. ";
+                string exampleFollowUp = "Please following the above example. ";
+                string patternFollowUp = "Please following the above pattern and print the dimension, measure, an indication of whether the results would be returned in ascending or descending order and a limit for the number of results that would be returned: ";
+
+                var prompt = $"{baseIntro}{measures}{examples}{querySpecs}{dimensionDetail}{measureDetail}{orderDetail}{limitDetail}{exampleFollowUp}{patternFollowUp}\"{inputQuery}\".";
+
                 
                 var data = new
                 {
@@ -151,6 +163,11 @@ namespace OpenAI_Sales_Query
                 if (values.Count > 4)
                 {
                     return "Too many elements in the result. Please enter your question again.";
+                }
+
+                if (values.Count < 4)
+                {
+                    return "Too less elements in the result. Please enter your question again.";
                 }
 
                 if (!values.Any(v => !string.IsNullOrWhiteSpace(v)))
