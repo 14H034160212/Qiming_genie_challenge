@@ -14,7 +14,7 @@ You need to create an virtual environment and enter into the environment.
 
 And install the following packages.
 
-`pip install openai`
+`pip install openai, pandas`
 
 Run the program.
 
