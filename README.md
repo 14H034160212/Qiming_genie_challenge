@@ -12,7 +12,7 @@ You need to create an virtual environment.
 
 And install the following packages.
 
-'pip install openai'
+`pip install openai`
 
 Run the program.
 
