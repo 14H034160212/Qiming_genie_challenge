@@ -5,6 +5,7 @@ import pandas as pd
 from tqdm import tqdm
 import argparse
 import re
+import ast
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_name', default="gpt-3.5-turbo",
@@ -29,14 +30,6 @@ openai.api_key = args.api_key
 def clean_string(s):
     return ''.join(char for char in s if ord(char) < 256)
 
-def extract_value(input_str):
-    dictionary = {}
-    for line in input_str.split("\n"):
-        if ":" in line:
-            key, value = line.split(":")
-            dictionary[key] = value.strip()
-    return dictionary
-
 # Interactive loop for user input
 while True:
     chat_history = []
@@ -54,12 +47,19 @@ while True:
     prompt_part6 = "- the measure that would be aggregated, in this case 'value' "
     prompt_part7 = "- an indication of whether the results would be returned in ascending or descending order, in this case descending "
     prompt_part8 = "- optionally, a limit for the number of results that would be returned, in this case 5. "
-    prompt_part9 = "Please following the above example. "
-    prompt_part10 = "Please following the above pattern and print the dimension, measure, an indication of whether the results would be returned in ascending or descending order and a limit for the number of results that would be returned:"
+    prompt_part9 = "User input: lowest selling products by count. -> Output: product, quantity, descending, no limit. "
+    prompt_part10 = "Each query, such as 'lowest selling products by count' will specify: "
+    prompt_part11 = "- the dimension that would be used to group the results, in this case 'product' "
+    prompt_part12 = "- the measure that would be aggregated, in this case 'quantity' "
+    prompt_part13 = "- an indication of whether the results would be returned in ascending or descending order, in this case ascending "
+    prompt_part14 = "- optionally, a limit for the number of results that would be returned, in this case no limit. "
+    prompt_part15 = "Please following the above example. "    
+    prompt_part16 = "Please following this json pattern to output the result. {'dimension': _, 'measure': _, 'order': _, 'limit': _ }"
+    # prompt_part16 = "Please following the above pattern and print the dimension, measure, an indication of whether the results would be returned in ascending or descending order and a limit for the number of results that would be returned:"
 
-    prompt = prompt_part1 + prompt_part2 + prompt_part3 + prompt_part4 + prompt_part5 + prompt_part6 + prompt_part7 + prompt_part8 + prompt_part9 + prompt_part10
+    prompt = prompt_part1 + prompt_part2 + prompt_part3 + prompt_part4 + prompt_part5 + prompt_part6 + prompt_part7 + prompt_part8 + prompt_part9 + prompt_part10 + prompt_part11 + prompt_part12 + prompt_part13 + prompt_part14 + prompt_part15 + prompt_part16
 
-    chat_history.append({"role": "user", "content": prompt + clean_string(query)})
+    chat_history.append({"role": "user", "content": prompt + clean_string(query.lower())})
 
     response = openai.ChatCompletion.create(
         model=args.model_name,
@@ -74,7 +74,10 @@ while True:
     reply = response["choices"][0]["message"]["content"]
     reply = reply.lower()
 
-    dictionary = extract_value(reply)
+    corrected_reply = reply.replace("'", '"')
+    corrected_reply = re.sub(r'\bnone\b', 'null', corrected_reply)
+    dictionary = json.loads(corrected_reply)
+    
     if len(dictionary) > 4:
         print("Too many elements in the result. Please enter your question again.")
         continue
@@ -93,12 +96,13 @@ while True:
     if "value" in measure:
         measure = "total value"
     
-    if "all" in limit.lower() or "specifi" in limit.lower() or "no" in limit.lower():
+    if limit is None:
         print(f"{dimension}, {measure}, {order}, {'no limit'}")
+    elif isinstance(limit, str):
+        if "all" in limit.lower() or "specifi" in limit.lower() or "no" in limit.lower():
+            print(f"{dimension}, {measure}, {order}, {'no limit'}")
     else:
-        limits = re.findall(r'\d+', limit)
-        limit_number = limits[0]
-        print(f"{dimension}, {measure}, {order}, limit {limit_number}")
+        print(f"{dimension}, {measure}, {order}, limit {limit}")
 
     # Add the model's response to the chat history
     chat_history.append({"role": "system", "content": clean_string(reply)})

@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace OpenAI_Sales_Query
 {
@@ -62,10 +63,16 @@ namespace OpenAI_Sales_Query
                 string measureDetail = "- the measure that would be aggregated, in this case 'value' ";
                 string orderDetail = "- an indication of whether the results would be returned in ascending or descending order, in this case descending ";
                 string limitDetail = "- optionally, a limit for the number of results that would be returned, in this case 5. ";
+                string examples2 = "Here are some examples. User input: lowest selling products by count. -> Output: product, quantity, descending, no limit. ";
+                string querySpecs2 = "Each query, such as 'lowest selling products by count' will specify: ";
+                string dimensionDetail2 = "- the dimension that would be used to group the results, in this case 'product' ";
+                string measureDetail2 = "- the measure that would be aggregated, in this case 'quantity' ";
+                string orderDetail2 = "- an indication of whether the results would be returned in ascending or descending order, in this case ascending ";
+                string limitDetail2 = "- optionally, a limit for the number of results that would be returned, in this case no limit. ";
                 string exampleFollowUp = "Please following the above example. ";
-                string patternFollowUp = "Please following the above pattern and print the dimension, measure, an indication of whether the results would be returned in ascending or descending order and a limit for the number of results that would be returned: ";
+                string patternFollowUp = "Please following this json pattern to output the result. {'dimension': _, 'measure': _, 'order': _, 'limit': _ }";
 
-                var prompt = $"{baseIntro}{measures}{examples}{querySpecs}{dimensionDetail}{measureDetail}{orderDetail}{limitDetail}{exampleFollowUp}{patternFollowUp}\"{inputQuery}\".";
+                var prompt = $"{baseIntro}{measures}{examples}{querySpecs}{dimensionDetail}{measureDetail}{orderDetail}{limitDetail}{examples2}{querySpecs2}{dimensionDetail2}{measureDetail2}{orderDetail2}{limitDetail2}{exampleFollowUp}{patternFollowUp}\"{inputQuery}\".";
 
                 
                 var data = new
@@ -106,76 +113,50 @@ namespace OpenAI_Sales_Query
                 // Convert the string to lowercase
                 reply = reply.ToLower();
 
-                // Split the string by newline to get each line separately
-                string[] lines = reply.Split('\n');
+                string correctedReply = reply.Replace("'", "\"");
+                correctedReply = Regex.Replace(correctedReply, @"\bnone\b", "null", RegexOptions.IgnoreCase);
+                
+                Dictionary<string, object> dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(correctedReply);
 
-                // Use a dictionary to map each keyword to its corresponding value
-                Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
-
-                foreach (var line in lines)
-                {
-                    var parts = line.Split(':');
-                    if (parts.Length == 2)
-                    {
-                        // Trim whitespace and add to the dictionary
-                        keyValuePairs[parts[0].Trim()] = parts[1].Trim();
-                    }
-                }
-
-                // Print the required values with comma separation
-                List<string> values = new List<string>();
-                foreach (var key in keyValuePairs.Keys)
-                {
-                    var value = keyValuePairs[key];
-                    if (key == "limit")
-                    {
-                        if (value.Contains("all") || value.Contains("specifi") || value.Contains("no"))
-                        {
-                            values.Add("no limit");
-                        }
-                        else
-                        {
-                            Regex regex = new Regex(@"\d+");
-                            Match match = regex.Match(value);
-                            if (match.Success)
-                            {
-                                values.Add($"{key} {match.Value}");
-                            }
-                            else
-                            {
-                                values.Add($"{key} {value}");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (value.Contains("value"))
-                        {
-                            values.Add("total value");
-                        }
-                        else
-                        {
-                            values.Add(value);
-                        }
-                    }
-                }
-
-                if (values.Count > 4)
+                if (dictionary.Count > 4)
                 {
                     return "Too many elements in the result. Please enter your question again.";
                 }
 
-                if (values.Count < 4)
+                if (dictionary.Count < 4)
                 {
                     return "Too less elements in the result. Please enter your question again.";
                 }
 
-                if (!values.Any(v => !string.IsNullOrWhiteSpace(v)))
+                if (dictionary == null || dictionary.Count == 0)
                 {
-                    return "No valid output received. Please enter your question again.";
+                    return "No valid output received. Please rephrase your question.";
                 }
 
-                return string.Join(", ", values.Where(v => !string.IsNullOrWhiteSpace(v)));
+                var keys = new List<string>(dictionary.Keys);
+                string dimension = dictionary[keys[0]].ToString();
+                string measure = dictionary[keys[1]].ToString();
+                string order = dictionary[keys[2]].ToString();
+                object limitObj = dictionary[keys[3]];
+                string limit = limitObj == null ? null : limitObj.ToString();
+
+                if (measure.Contains("value"))
+                {
+                    measure = "total value";
+                }
+
+                if (limit == null)
+                {
+                    return $"{dimension}, {measure}, {order}, no limit";
+                }
+                else if (limit.ToLower().Contains("all") || limit.ToLower().Contains("specifi") || limit.ToLower().Contains("no"))
+                {
+                    return $"{dimension}, {measure}, {order}, no limit";
+                }
+                else
+                {
+                    return $"{dimension}, {measure}, {order}, limit {limit}";
+                }
             }
         }
 
