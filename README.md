@@ -33,16 +33,22 @@ Input: `"highest selling products by count"` -> Output: `product, quantity, desc
 Input: `"10 regions with the lowest sales by value"` -> Output: `region, total value, ascending, limit 10`
 
 ### More complex test cases 
-Input: `"lowest 5 sales reps by value sold"` -> Output： `salesperson, total value, ascending, limit 5`
+Input: `lowest 5 sales reps by value sold` -> Output： `salesperson, total value, ascending, limit 5`
 
-Input: `"worst 5 sales reps by value sold"` -> Output： `salesperson, total value, ascending, limit 5`
+Input: `worst 5 sales reps by value sold` -> Output： `salesperson, total value, ascending, limit 5`
 
-Input: `"lowest selling products by count"` -> Output： `product, quantity, ascending, no limit`
+Input: `lowest selling products by count` -> Output： `product, quantity, ascending, no limit`
 
-Input: `"worst selling products by count"` -> Output： `product, quantity, ascending, no limit`
+Input: `worst selling products by count` -> Output： `product, quantity, ascending, no limit`
 
-Input: `"Worst performing categories by value"` -> Output： `product category, total value, ascending, no limit`
+Input: `Worst performing categories by value` -> Output： `product category, total value, ascending, no limit`
 
-Input: `"Best performing categories by value"` -> Output： `product category, total value, descending, no limit`
+Input: `Best performing categories by value` -> Output： `product category, total value, descending, no limit`
 
-Input: `"highest performing categories by value"` -> Output： `product category, total value, descending, no limit`
+Input: `highest performing categories by value` -> Output： `product category, total value, descending, no limit`
+
+## Prompt Desgin
+We designed the prompt based on the following aspects.
+1) Provide a base introduction for the sales database with specific dimensions `- product (string) - product category (string) - salesperson (string) - region (string)` and measures `- quantity (integer) - price (float) - total value (float)`.
+2) Provide two specific examples, along with a step-by-step explanation corresponding to the database's dimensions and measures. These examples should be representative and cover different dimensions and measures. The examples I've given are `top 5 sales reps by value sold` and `lowest selling products by count`.
+3) Provide a standard format for output: `Please following the above example and using json pattern to output the result. {'dimension': _, 'measure': _, 'order': _, 'limit': _ }`
