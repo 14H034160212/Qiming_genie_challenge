@@ -47,7 +47,7 @@ Input: `Best performing categories by value` -> Output： `product category, tot
 
 Input: `highest performing categories by value` -> Output： `product category, total value, descending, no limit`
 
-## Prompt Desgin
+### Prompt Desgin
 We designed the prompt based on the following aspects.
 1) Provide a base introduction for the sales database with specific dimensions `- product (string) - product category (string) - salesperson (string) - region (string)` and measures `- quantity (integer) - price (float) - total value (float)`.
 2) Provide two specific examples, along with a step-by-step explanation corresponding to the database's dimensions and measures. These examples should be representative and cover different dimensions and measures. The examples I've given are `top 5 sales reps by value sold` and `lowest selling products by count`.
